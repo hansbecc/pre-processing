@@ -30,7 +30,7 @@ git pull origin master
 git add file.xx
 ```
 
-**Prepering Step:** To join all files added with a message text included about the changes (e.g. "Update the text README")
+**Preparing Step:** To join all files added with a message text included about the changes (e.g. "Update the text README")
 
 ```
 git commit -m "write the changes done here (start with infinitive verb: update, add,etc)"
