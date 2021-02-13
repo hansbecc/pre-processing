@@ -22,7 +22,7 @@ df = spark.read.format("csv") \
      .option("inferSchema","true") \
      .option("header","true") \
      .option("sep",",") \
-     .load("datasets/ds_diabetes.csv")
+     .load("ds_diabetes.csv")
 
 ```
 
@@ -40,6 +40,34 @@ df.head(5)
      Row(Pregnancies=1, Glucose=89, BloodPressure=66, SkinThickness=23, Insulin=94, BMI=28.1, DiabetesPedigreeFunction=0.167, Age=21, Outcome=0),
      Row(Pregnancies=0, Glucose=137, BloodPressure=40, SkinThickness=35, Insulin=168, BMI=43.1, DiabetesPedigreeFunction=2.288, Age=33, Outcome=1)]
 
+
+
+
+```python
+!pip install pyspark_dist_explore
+```
+
+
+```python
+from pyspark_dist_explore import hist
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Doing the heavy lifting in Spark. We could leverage the `histogram` function from the RDD api
+
+preg_histogram = df.select('BloodPressure').rdd.flatMap(lambda x: x).histogram(8)
+# Loading the Computed Histogram into a Pandas Dataframe for plotting
+pd.DataFrame(
+    list(zip(*preg_histogram)), 
+    columns=['Intervalos', 'Frequencias']
+).set_index(
+    'Intervalos'
+).plot(kind='bar',alpha=0.5);
+
+```
+
+
+![png](output_4_0.png)
 
 
 
@@ -158,6 +186,22 @@ features = ['Pregnancies_one_hot','Glucose','BloodPressure',
 vector_assembler = VectorAssembler(inputCols = features, outputCol= "features")
 data_training_and_test = vector_assembler.transform(df)
 ```
+
+
+```python
+data_training_and_test.head(5)
+```
+
+
+
+
+    [Row(Pregnancies=6, Glucose=148, BloodPressure=72, SkinThickness=35, Insulin=0, BMI=33.6, DiabetesPedigreeFunction=0.627, Age=50, Outcome=1, Pregnancies_string_encoded=6.0, Pregnancies_one_hot=SparseVector(16, {6: 1.0}), features=SparseVector(23, {6: 1.0, 16: 148.0, 17: 72.0, 18: 35.0, 20: 33.6, 21: 0.627, 22: 50.0})),
+     Row(Pregnancies=1, Glucose=85, BloodPressure=66, SkinThickness=29, Insulin=0, BMI=26.6, DiabetesPedigreeFunction=0.351, Age=31, Outcome=0, Pregnancies_string_encoded=0.0, Pregnancies_one_hot=SparseVector(16, {0: 1.0}), features=SparseVector(23, {0: 1.0, 16: 85.0, 17: 66.0, 18: 29.0, 20: 26.6, 21: 0.351, 22: 31.0})),
+     Row(Pregnancies=8, Glucose=183, BloodPressure=64, SkinThickness=0, Insulin=0, BMI=23.3, DiabetesPedigreeFunction=0.672, Age=32, Outcome=1, Pregnancies_string_encoded=8.0, Pregnancies_one_hot=SparseVector(16, {8: 1.0}), features=SparseVector(23, {8: 1.0, 16: 183.0, 17: 64.0, 20: 23.3, 21: 0.672, 22: 32.0})),
+     Row(Pregnancies=1, Glucose=89, BloodPressure=66, SkinThickness=23, Insulin=94, BMI=28.1, DiabetesPedigreeFunction=0.167, Age=21, Outcome=0, Pregnancies_string_encoded=0.0, Pregnancies_one_hot=SparseVector(16, {0: 1.0}), features=SparseVector(23, {0: 1.0, 16: 89.0, 17: 66.0, 18: 23.0, 19: 94.0, 20: 28.1, 21: 0.167, 22: 21.0})),
+     Row(Pregnancies=0, Glucose=137, BloodPressure=40, SkinThickness=35, Insulin=168, BMI=43.1, DiabetesPedigreeFunction=2.288, Age=33, Outcome=1, Pregnancies_string_encoded=1.0, Pregnancies_one_hot=SparseVector(16, {1: 1.0}), features=SparseVector(23, {1: 1.0, 16: 137.0, 17: 40.0, 18: 35.0, 19: 168.0, 20: 43.1, 21: 2.288, 22: 33.0}))]
+
+
 
 
 ```python
